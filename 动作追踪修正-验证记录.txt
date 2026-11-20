@@ -1,0 +1,82 @@
+气脉陪练 4.0 · 动作追踪修正版
+
+本次问题：已观察到姿势到位，但连续 3 秒计时被短暂偏差或超过 250 毫秒的采样间隔反复清零；固定步骤时长进一步延迟切换。预备动画和判定目标原来也不一致。
+
+修正：有效观测约 1.2 秒确认，保留原动作路径与 2 秒动画过渡；短暂不确定观测暂停累计；明显偏差和长时中断重新确认；计算在可用浏览器的独立线程执行，兼容旧浏览器；过期或跨步骤结果不参与判定。
+
+完成记录按全部 8 步和真实练习用时保存，避免旧版 38 秒下限挡住更快完成的练习。金币数量、每日上限、装扮、好友、数据版本和音频素材不变。
+
+验证：58 组自动化回归检查全部通过，包含十二势各步骤、低帧率、短时遮挡、错误动作、冻结画面、暂停、延迟结果、相机权限失败、保存和奖励。
+浏览器实测：本机真实模型在 Worker 中处理 12 张空白测试画面，处理期间主线程继续刷新。空白画面测试只验证模型加载和线程运行，不代表真人动作识别准确率。
+浏览器流程验证：用合成人体关键点驱动真实练习页面，第一式自动完成并显示已保存 1 段动作要点观察、12 金币。测试记录只在内存，不写入个人历史。
+直接启动入口已验证，页面包含 tracking-1 标识及 1.2 秒确认进度，模型与所有依赖正常加载。
+本次没有使用你的真人摄像头数据评估识别准确率；具体体型、光照与遮挡条件仍需现场复测。
+
+PASS 12 standing and 6 seated lessons have valid, distinct motion paths
+PASS seated animation keeps hips and feet fixed for every pose
+PASS real practice rewards once per record and once per lesson per day
+PASS daily practice coins capped at 60; demo and incomplete practice earn nothing
+PASS milestone rewards are earned and cannot be claimed twice
+PASS purchases and equip/unequip preserve balance and ownership
+PASS friends join via invitation and update leaderboard from reports
+PASS cross-group, malformed and future reports are rejected
+PASS leaderboard limits effective minutes and ignores previous weeks
+PASS upper-body steps ignore unseen legs; leg-dependent steps still require full framing
+PASS basic targets accepted; low arm and occlusion produce specific correction
+11 regression groups passed
+
+PASS all 12 lessons and both sides have supported, independently authored positive inputs
+PASS each pose rejects occluded joints and supplies specific corrective joints
+PASS height, elbow, front knee, squat, depth, turn, bend and tail faults cannot pass
+PASS complex poses with unknown depth/turn never guess a pass
+PASS confirmation uses fresh observations and preserves only brief uncertain gaps
+PASS motion paths land exactly, stay finite and remain continuous through via poses
+PASS seated paths keep legs planted, stationary standing feet do not float
+PASS character arms keep fixed lengths and avoid elbow jumps across all paths
+8 motion/correction groups passed
+
+PASS known geometric angles are correct; degenerate joints are unknown, not zero degrees
+PASS raised, visibly straight arms do not inherit erroneous model depth angles
+PASS overhead reach with natural elbow flexion is accepted; hands below the head are not
+PASS small shoulder-height differences pass while a clearly dropped arm remains blocked
+PASS unseen knees and ankles cannot block an upper-body step; lower-body steps still require them
+PASS body size, distance, translation and video aspect do not change a valid pose result
+PASS camera pitch and roll do not become forward-bend angles
+PASS shoulder-hip twist stays unchanged when the camera is tilted
+PASS unknown or degenerate 3D joints do not produce invented angles or a false pass
+PASS short-window filtering and hysteresis prevent boundary flicker without accumulating stale frames
+PASS occlusion, target changes and timestamp gaps discard previously accepted measurements
+PASS all twelve lessons still require actual pose observations and a fresh pose confirmation
+PASS standing still never passes any active target, and confidence gates match the skeleton
+13 numeric accuracy and sensitivity groups passed
+
+PASS standing challenge waits for camera; right skeleton module stays visible
+PASS explicit free practice completes all 12 lessons without AI pass records; rewards unchanged
+PASS full demo does not award or alter practice history
+PASS every step of all 12 standing lessons passes using independent pose fixtures and continuous hold
+PASS original six seated lessons retain four observable AI lessons
+PASS deviation, occlusion, stale video and camera off block progress; fresh observed confirmation required after correction
+PASS ambiguous forward depth never passes without reliable 3D landmarks
+PASS background pause and inference errors reset hold; explicit resume restores correct pass
+PASS denied camera never silently bypasses challenge
+PASS a late camera permission response cannot close a newer session camera
+
+PASS newer voice cue replaces stale asynchronous audio
+PASS pause cancels pending playback and repeated cues reuse decoded audio
+PASS missing clip falls back to system speech; voice toggle disables new cues
+PASS all 134 offline clips exist and cover every action and breathing cue
+
+PASS low-frame-rate cameras (2–20 observations/sec) can confirm a correct pose
+PASS every target tolerates isolated occluded frames without counting them as correct
+PASS gross mistakes, prolonged loss, repeated timestamps and stale frames cannot carry progress
+PASS first-form chest prayer advances automatically; repeated prayer needs fresh confirmation; lowering hands is still required
+PASS 300ms camera samples with delayed inference complete the first form and save real elapsed time
+PASS 550ms inference latency does not trigger an endless stale-result reset
+PASS late inference replies after pause cannot restore cleared progress
+PASS over-age results never pass a step; fresh tracking recovers without restarting the lesson
+PASS faster complete lessons save without invented time; incomplete runs and duplicate rewards remain blocked
+
+PASS worker uses script-relative URLs and releases frame buffers and worker resources
+PASS browsers without worker support and failed worker initialization use the existing local model fallback
+PASS a failed worker inference switches to compatibility mode without hanging the frame queue
+

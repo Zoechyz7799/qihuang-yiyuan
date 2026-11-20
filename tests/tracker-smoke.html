@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>本机动作识别线程验证</title><style>body{font:17px system-ui;padding:32px;line-height:1.7;color:#183550;background:#f5f8fc}pre{white-space:pre-wrap}canvas{border:1px solid #cbd8e4}</style><h1>本机动作识别线程验证</h1><p>使用空白测试画面，不调用摄像头、不写入练习记录。</p><p id="status">正在加载真实识别模型…</p><pre id="result"></pre><canvas id="frame" width="640" height="480"></canvas><script src="../tracker.js"></script><script>
+(async()=>{let tracker,raf=0,ticks=0,running=true;function tick(){ticks++;if(running)raf=requestAnimationFrame(tick);}tick();
+try{const canvas=document.getElementById('frame'),ctx=canvas.getContext('2d');ctx.fillStyle='#eee';ctx.fillRect(0,0,640,480);
+tracker=await QimaiTracker.create();const backend=tracker.backend,details=[];let startTicks=ticks;
+for(let i=0;i<12;i++){const begin=performance.now();const result=await tracker.detectForVideo(canvas,begin);if(!Array.isArray(result.landmarks))throw Error('模型返回格式错误');details.push({frame:i+1,ms:Math.round(performance.now()-begin),people:result.landmarks.length});}
+const report={backend,frames:details.length,animationFramesDuringInference:ticks-startTicks,details};
+document.getElementById('result').textContent=JSON.stringify(report,null,2);document.getElementById('status').textContent=backend==='worker'?'通过：真实模型在独立线程完成连续识别，主界面保持刷新。':'兼容模式通过：当前浏览器使用主线程回退。';
+}catch(error){document.getElementById('status').textContent='验证失败：'+(error?.message||String(error));document.getElementById('result').textContent=error?.stack||String(error);}
+finally{running=false;cancelAnimationFrame(raf);tracker?.close();}})();
+</script></html>

@@ -1,0 +1,19 @@
+气脉陪练 3.0 · 美术素材说明
+
+刘看山动态与形象参考：用户提供的《气脉陪练-跨平台版》素材包。
+assets/gif/idle.gif、hello.gif、laptop.gif、sway.gif、ball.gif、sleep.gif 均沿用原包文件。
+本作品标注为知乎创客松参赛原型，不表示知乎官方发布或认证。
+
+界面：代码制作的知乎蓝与白色布局、SVG 图标、渐变小院、圆台、云、动作卡和陪伴交互。
+练习人物：透明躯干位图 + 程序绘制的黑色四肢、衣饰及场景。人物形象遵循用户提供的刘看山参考。
+背景音乐：sound.js 内程序合成的音符序列。
+中文口令：本机中文合成语音生成的离线 WAV；未接入云语音服务。
+
+透明躯干素材：assets/mascot/liukanshan-body.png
+使用内置 image_gen 工具生成，并在第二轮清理外轮廓。输入参考为原包 assets/photo/ks-coach-front.png。
+
+第一轮提示词：
+Use case: identity-preserve. Asset type: transparent 2D rig body sprite for a wellness exercise companion, based on the user-supplied Zhihu mascot Liu Kanshan reference. Edit the supplied image. Preserve the EXACT recognizable front-facing Liu Kanshan character body, two white pointed ears, tiny black eyes, enormous round glossy black nose, and smooth pear-shaped continuous head-and-torso silhouette. Preserve original proportions, face placement and high quality soft 3D material. Remove ONLY both black arms, both black legs, floor and gray background, leaving just the white unified head-and-torso body with its face and ears on genuine transparent alpha. No detached limbs, no black stubs. Clean natural white silhouette at removed-arm attachment sites. Front view, centered, upright, entire body including ears and round bottom visible, tightly framed with 4% padding around the silhouette. Not a complete character: this is intentionally the torso/head component to which code will animate black limbs. No text, no accessories, no outlines, no redesign, no extra ears, no external shadow outside body. Keep subtle interior shading and specular black nose detail. High fidelity to the reference image.
+
+第二轮提示词：
+Use case background-extraction. Refine this same Liu Kanshan torso sprite for production. Keep exactly the character, colors, enormous black nose, tiny eyes, ears, pear-shaped white torso and interior 3D shading. Fix ONLY the boundary and transparent padding. The current output has stray white speckles, ragged cutout edge and partial pixels beyond the silhouette. Remove every stray external fragment and make a single perfectly smooth clean antialiased silhouette, with genuine completely transparent surrounding area. Keep the whole silhouette entirely in frame with even 5% transparent margin. No new limbs, no accessories, no shadow or glow outside the silhouette, no outline, no background. At each edge use a smooth mathematically clean curve like a high quality PNG character sprite. No white speckle islands near the ears or body. Preserve identity and proportions.
