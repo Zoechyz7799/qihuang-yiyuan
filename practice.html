@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>練習 · 氣脈陪練</title>
+    <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/ink-theme.css" />
+  </head>
+  <body>
+    <noscript><p class="noscript">這個頁面需要 JavaScript。</p></noscript>
+    <div class="practice-page">
+      <header class="practice-header">
+        <h1 id="practice-title">練習</h1>
+        <div class="header-tools">
+          <div class="lang" role="group" aria-label="語言">
+            <button type="button" id="lang-zh" aria-pressed="true">中</button>
+            <button type="button" id="lang-en" aria-pressed="false">EN</button>
+          </div>
+          <select id="voice-select" class="voice-select" aria-label="英文語音" hidden></select>
+          <button type="button" class="sound-toggle" id="sound-toggle" aria-pressed="true">音樂 開</button>
+        </div>
+      </header>
+
+      <section class="panel" id="screen-disclaimer">
+        <h2 id="disclaimer-title">練習前請注意</h2>
+        <p id="disclaimer-body"></p>
+        <div class="actions">
+          <button type="button" class="secondary" id="disclaimer-skip">跳過</button>
+          <button type="button" class="primary" id="disclaimer-accept">我了解了</button>
+        </div>
+      </section>
+
+      <section class="panel" id="screen-choose" hidden>
+        <h2 id="choose-set-title">選擇套路</h2>
+        <div class="mode-list set-list" role="group" id="set-picker" aria-label="套路">
+          <button type="button" class="mode-option" id="set-yijin" data-set="yijin" aria-pressed="true">
+            <span class="mode-label" id="set-yijin-label">易筋經十二勢</span>
+            <span class="tag" id="set-yijin-tag">12</span>
+          </button>
+          <button type="button" class="mode-option" id="set-wushu" data-set="wushu-three" aria-pressed="false">
+            <span class="mode-label" id="set-wushu-label">武術三式</span>
+            <span class="tag" id="set-wushu-tag">3</span>
+          </button>
+        </div>
+        <h2 id="choose-title">選擇練習方式</h2>
+        <div class="mode-list">
+          <button type="button" class="mode-option" id="mode-segment" aria-pressed="true">
+            <span class="mode-label">練這一段</span>
+            <span class="tag" id="segment-recommend"></span>
+          </button>
+          <button type="button" class="mode-option" id="mode-full" aria-pressed="false">
+            <span class="mode-label">連續練完整套</span>
+          </button>
+        </div>
+        <div class="actions">
+          <button type="button" class="primary" id="begin">開始</button>
+        </div>
+      </section>
+
+      <section class="panel" id="screen-active" hidden>
+        <div class="guide-stage" data-phase="prep" id="guide-stage">
+          <img
+            class="guide-pose"
+            id="guide-pose"
+            src="./public/poses/idle.webp"
+            alt=""
+            draggable="false"
+          />
+          <span class="guide-stage-badge" id="stage-badge">起</span>
+        </div>
+        <div class="progress-track" aria-label="節奏">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="phase-row">
+          <strong id="segment-label"></strong>
+          <span class="phase-pill" id="phase-label"></span>
+          <span class="breath-glow" id="breath-label" hidden></span>
+        </div>
+        <p id="cue-label"></p>
+
+        <div class="camera-box">
+          <p id="camera-hint"></p>
+          <button type="button" class="secondary" id="camera-toggle">一鍵開啟本地攝像頭</button>
+          <div class="camera-stage" id="camera-stage" hidden>
+            <!-- Video stays playing for MediaPipe; opacity 0 only (no visibility:hidden — that can stall decode). -->
+            <video
+              id="camera-preview"
+              class="camera-preview"
+              playsinline
+              muted
+              autoplay
+              aria-hidden="true"
+              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;transform:scaleX(-1)"
+            ></video>
+            <canvas
+              id="poseCanvas"
+              class="pose-overlay"
+              width="640"
+              height="480"
+              aria-hidden="true"
+              style="position:absolute;inset:0;width:100%;height:100%;background:#15201c;pointer-events:none;z-index:1"
+            ></canvas>
+            <p class="camera-privacy-chip" id="camera-privacy-chip">畫面僅在本機處理，不會上傳或儲存。</p>
+          </div>
+          <p class="pose-angle" id="pose-angle" hidden></p>
+          <p class="pose-readout" id="pose-readout" data-status=""></p>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="secondary" id="interrupt">中斷本次</button>
+          <button type="button" class="primary" id="finish">完成</button>
+        </div>
+      </section>
+
+      <section class="panel" id="screen-done" hidden>
+        <h2 id="done-title">本輪結束</h2>
+        <div class="stats-row">
+          <div class="stat">
+            <span id="stat-today-label">今日時長</span>
+            <strong id="today-duration">0</strong>
+          </div>
+          <div class="stat">
+            <span id="stat-interrupt-label">中斷次數</span>
+            <strong id="interrupt-count">0</strong>
+          </div>
+        </div>
+        <div class="card-result" id="card-result"></div>
+        <div class="actions">
+          <button type="button" class="secondary" id="download-card">下載目前這面 PNG</button>
+          <a class="primary" id="back-home" href="./index.html">回桌寵</a>
+        </div>
+        <section class="memory" id="memory">
+          <h3 id="memory-title">回憶</h3>
+          <div class="memory-grid" id="memory-grid"></div>
+        </section>
+      </section>
+    </div>
+    <script type="module">
+      import { bootPractice } from "./js/ui/practice.js";
+      bootPractice(document);
+    </script>
+  </body>
+</html>

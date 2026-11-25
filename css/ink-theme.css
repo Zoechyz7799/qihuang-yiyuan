@@ -1,0 +1,203 @@
+/**
+ * 中國風水墨主題層 — 只覆蓋色彩、字體與邊框質感。
+ * 不改動任何 DOM 結構、版面尺寸、互動邏輯或既有功能。
+ * 載入順序務必在 css/main.css 之後。
+ */
+
+:root {
+  color-scheme: light;
+  --bg: #f2eee2;
+  --bg-glow:
+    radial-gradient(120% 80% at 8% 0%, rgba(226, 233, 220, 0.95) 0%, transparent 58%),
+    radial-gradient(90% 70% at 100% 100%, rgba(238, 222, 196, 0.9) 0%, transparent 55%),
+    linear-gradient(165deg, #f5f1e6 0%, #eae6d8 100%);
+  --panel: rgba(252, 249, 240, 0.9);
+  --ink: #23302a;
+  --muted: #66716a;
+  --line: #d6cbb2;
+  --accent: #315c50;
+  --accent-soft: #e3ebe0;
+  --warn: #a5352b;
+  --vermilion: #a5352b;
+  --paper: #faf7ee;
+  --shadow: 0 10px 30px rgba(52, 46, 32, 0.09);
+  --glow: 0 0 0 1px rgba(165, 53, 43, 0.12), 0 0 26px rgba(90, 110, 88, 0.2);
+}
+
+/* 宣紙纖維感：純 CSS 漸層，不載入任何圖片、不發網路請求。 */
+body {
+  background-color: var(--bg);
+  background-image:
+    repeating-linear-gradient(94deg, rgba(120, 105, 80, 0.018) 0 1px, transparent 1px 5px),
+    var(--bg-glow);
+}
+
+/* 頂部一道朱紅細線，像卷軸的綾邊。 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 90;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(165, 53, 43, 0.55) 18%, rgba(165, 53, 43, 0.75) 50%, rgba(165, 53, 43, 0.55) 82%, transparent);
+}
+
+::selection {
+  background: rgba(165, 53, 43, 0.22);
+  color: var(--ink);
+}
+
+/* 標題改用宋體／明體，拉開字距，像秘籍題簽。 */
+h1, h2, h3,
+.brand-mark,
+.panel h2,
+.memory h3,
+.qalbum-panel > h3 {
+  font-family: "Songti SC", "Noto Serif CJK TC", "Source Han Serif TC", "PMingLiU", "SimSun", serif;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.brand-mark {
+  font-weight: 800;
+  color: #4a3b2c;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* 品牌旁一枚朱紅小印，純裝飾不影響點擊。 */
+.brand-mark::after {
+  content: "氣";
+  display: inline-grid;
+  place-items: center;
+  margin-left: 9px;
+  width: 22px;
+  height: 22px;
+  vertical-align: 2px;
+  border: 1.5px solid rgba(165, 53, 43, 0.85);
+  border-radius: 3px;
+  color: rgba(165, 53, 43, 0.92);
+  font-family: "Songti SC", "SimSun", serif;
+  font-size: 0.78rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* 面板：宣紙底 + 內外雙線，收一點圓角像冊頁。 */
+.panel,
+.card {
+  background:
+    linear-gradient(155deg, rgba(255, 253, 246, 0.96), rgba(246, 241, 228, 0.94));
+  border: 1px solid #cfc3a7;
+  border-radius: 16px;
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.45),
+    inset 0 0 0 5px rgba(165, 53, 43, 0.08),
+    var(--shadow);
+}
+
+/* 主要按鈕：朱砂印泥；次要按鈕：墨線描邊。 */
+.primary {
+  background: linear-gradient(160deg, #b04737, #8f2f26);
+  border-color: #8f2f26;
+  color: #fff8ea;
+  box-shadow: 0 6px 18px rgba(143, 47, 38, 0.25);
+}
+
+.primary:hover {
+  filter: brightness(1.07);
+}
+
+.secondary {
+  background: rgba(252, 249, 240, 0.85);
+  border-color: rgba(49, 92, 80, 0.42);
+  color: #315c50;
+}
+
+.secondary:hover {
+  background: #e8efe5;
+}
+
+/* 選項卡、語切換、快捷鈕：淡墨描邊 + 朱紅選中態。 */
+.mode-option {
+  background: rgba(252, 249, 240, 0.78);
+  border-color: #d6cbb2;
+}
+
+.mode-option[aria-pressed="true"] {
+  border-color: rgba(165, 53, 43, 0.65);
+  background: linear-gradient(150deg, #f7eee2, #f3ece0);
+  box-shadow: inset 0 0 0 1px rgba(165, 53, 43, 0.15);
+}
+
+.lang button[aria-pressed="true"] {
+  background: #315c50;
+  color: #fff8ea;
+}
+
+/* 卡片模組的樣式是 JS 動態注入到 <head> 尾端，這裡用 body 前綴提高優先序。 */
+body .qcard-entry,
+body .qcard-album-btn,
+body .qdeck-open,
+body .qflip-toggle {
+  border-color: rgba(49, 92, 80, 0.4);
+  background: rgba(252, 249, 240, 0.92);
+  color: #315c50;
+}
+
+/* 卡冊入口加一枚朱紅邊，和卡背的「氣」印呼應。 */
+body .qcard-entry {
+  border-color: rgba(165, 53, 43, 0.55);
+  color: #8f2f26;
+  font-weight: 800;
+}
+
+body .qcard-entry:hover {
+  background: #a5352b;
+  color: #fff8ea;
+}
+
+/* 首頁「開始練習」跟著換成朱砂色，與主要按鈕一致。 */
+.practice-link {
+  border-color: #8f2f26;
+  background: linear-gradient(160deg, #b04737, #8f2f26);
+  color: #fff8ea;
+}
+
+/* 番茄鐘數字保留原本字體，只換墨色。 */
+.clock {
+  color: var(--ink);
+}
+
+/* 進度條、合成條換成墨綠 → 泥金。 */
+.qcard-synth-fill,
+.qdeck-fill,
+.qlit-fill {
+  background: linear-gradient(90deg, #5c8573, #c9a451);
+}
+
+.qcard-synth-dot.is-on {
+  background: #b8892f;
+}
+
+/* 練習頁頂部工具列：宣紙半透明。 */
+.header-tools select,
+.header-tools button {
+  border-color: rgba(49, 92, 80, 0.35);
+  background: rgba(252, 249, 240, 0.9);
+  color: #315c50;
+}
+
+/* 回憶功法區：淡墨分隔線。 */
+.memory {
+  border-top-color: rgba(165, 53, 43, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary,
+  .secondary,
+  .panel,
+  .card {
+    transition: none;
+  }
+}

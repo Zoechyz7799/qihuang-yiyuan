@@ -1,13 +1,13 @@
-﻿# 气脉陪练 Demo · Windows 内置静态服务器（无需安装 Python）
-# 由「启动-Demo-Windows.bat」调用；也可手动右键用 PowerShell 运行
-$ErrorActionPreference = 'SilentlyContinue'
+# Qi-Pulse interactive lesson - Windows built-in static server.
+# Launched by "Start-Interactive-Windows.bat". No Python or Node required.
+# All-ASCII on purpose: safe with Windows PowerShell 5.1 and non-ASCII folders.
 
+$ErrorActionPreference = 'SilentlyContinue'
 $root = $PSScriptRoot
 $rootPrefix = $root.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
 
-# 自动挑选一个空闲端口（从 8848 开始，被占用就依次尝试）
 $port = 0
-foreach ($candidate in @(8848, 8899, 8900, 8910, 8920)) {
+foreach ($candidate in @(4719, 4720, 4721, 4722, 4723, 4724, 4725, 4726)) {
   $probe = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, $candidate)
   try {
     $probe.Start()
@@ -19,26 +19,32 @@ foreach ($candidate in @(8848, 8899, 8900, 8910, 8920)) {
   }
 }
 if ($port -eq 0) {
-  Write-Host "找不到可用端口（8848/8899/8900/8910/8920 都被占用）。"
+  Write-Host "No free port found (4719-4726). Close other local servers and retry."
   Start-Sleep -Seconds 5
   exit 1
 }
 
 $types = @{
-  '.html'='text/html; charset=utf-8'
-  '.js'='application/javascript; charset=utf-8'
-  '.mjs'='application/javascript; charset=utf-8'
-  '.css'='text/css; charset=utf-8'
-  '.wasm'='application/wasm'
-  '.wav'='audio/wav'
-  '.png'='image/png'
-  '.jpg'='image/jpeg'
-  '.jpeg'='image/jpeg'
-  '.gif'='image/gif'
-  '.task'='application/octet-stream'
-  '.data'='application/octet-stream'
-  '.json'='application/json'
-  '.ico'='image/x-icon'
+  '.html'  = 'text/html; charset=utf-8'
+  '.htm'   = 'text/html; charset=utf-8'
+  '.js'    = 'application/javascript; charset=utf-8'
+  '.mjs'   = 'application/javascript; charset=utf-8'
+  '.css'   = 'text/css; charset=utf-8'
+  '.json'  = 'application/json; charset=utf-8'
+  '.txt'   = 'text/plain; charset=utf-8'
+  '.wasm'  = 'application/wasm'
+  '.task'  = 'application/octet-stream'
+  '.data'  = 'application/octet-stream'
+  '.png'   = 'image/png'
+  '.jpg'   = 'image/jpeg'
+  '.jpeg'  = 'image/jpeg'
+  '.gif'   = 'image/gif'
+  '.webp'  = 'image/webp'
+  '.svg'   = 'image/svg+xml'
+  '.ico'   = 'image/x-icon'
+  '.woff'  = 'font/woff'
+  '.woff2' = 'font/woff2'
+  '.wav'   = 'audio/wav'
 }
 
 try {
@@ -46,14 +52,22 @@ try {
   $listener.Prefixes.Add("http://localhost:$port/")
   $listener.Start()
 } catch {
-  Write-Host "端口 $port 启动失败。请关闭占用该端口的程序后重试。"
+  Write-Host "Failed to start on port $port. Close the program using that port and retry."
   Write-Host $_.Exception.Message
   Start-Sleep -Seconds 5
   exit 1
 }
 
-Write-Host "✅ 服务器已就绪：http://localhost:$port"
-Start-Process "http://localhost:$port"
+Write-Host "=============================================="
+Write-Host " Qi-Pulse / interactive lesson"
+Write-Host "=============================================="
+Write-Host "OK  Server ready: http://localhost:$port/practice.html"
+Write-Host "    Pet page    : http://localhost:$port/"
+Write-Host ""
+Write-Host "IMPORTANT: keep this window open while practising."
+Write-Host "Closing it stops the server (browser shows ERR_CONNECTION_REFUSED)."
+Write-Host ""
+Start-Process "http://localhost:$port/practice.html"
 
 try {
   while ($listener.IsListening) {
@@ -64,7 +78,6 @@ try {
       $rel = [Uri]::UnescapeDataString($req.Url.AbsolutePath.TrimStart('/'))
       if ($rel -eq '') { $rel = 'index.html' }
       $full = [System.IO.Path]::GetFullPath((Join-Path $root $rel))
-      # 防目录穿越
       if (-not $full.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
         $res.StatusCode = 403
       } elseif (Test-Path $full -PathType Leaf) {

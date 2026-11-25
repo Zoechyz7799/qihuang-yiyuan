@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840" role="img" aria-label="馬步架掌 碎片卡 2/3 水墨佔位圖">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8f5ed"/>
+      <stop offset="1" stop-color="#e4eee9"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="840" fill="url(#bg)"/>
+  <path d="M0 620 Q140 525 260 610 T600 570 L600 840 L0 840Z" fill="#c9d8cf" opacity=".45"/>
+  <path d="M0 690 Q170 600 330 680 T600 650 L600 840 L0 840Z" fill="#9fb9aa" opacity=".32"/>
+  <circle cx="300" cy="345" r="205" fill="none" stroke="#2f6f5e" stroke-opacity=".18" stroke-width="3"/>
+  <circle cx="300" cy="345" r="176" fill="none" stroke="#2f6f5e" stroke-opacity=".10" stroke-width="2"/>
+  <g fill="none" stroke="#2b3b36" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" opacity=".88">
+    <path d="M300 300 L300 440"/>
+    <path d="M298 322 L248 268 L232 196"/>
+    <path d="M302 322 L356 372 L372 438"/>
+    <path d="M300 440 L228 498 L214 570"/>
+    <path d="M300 440 L372 498 L386 570"/>
+  </g>
+  <circle cx="300" cy="262" r="35" fill="#2b3b36" opacity=".88"/>
+  <g fill="#f7d98a" opacity=".95">
+    <circle cx="232" cy="196" r="13"/>
+    <circle cx="372" cy="438" r="13"/>
+  </g>
+  <circle cx="502" cy="742" r="34" fill="#b7472f" opacity=".88"/>
+  <text x="502" y="753" text-anchor="middle" font-family="serif" font-size="27" fill="#fff">貳</text>
+  <text x="300" y="86" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="46" fill="#1c2a26">馬步架掌</text>
+  <text x="300" y="122" text-anchor="middle" font-family="sans-serif" font-size="20" letter-spacing="3" fill="#5a6b64">FRAGMENT 2 / 3</text>
+  <text x="300" y="790" text-anchor="middle" font-family="sans-serif" font-size="19" fill="#5a6b64">Qi-Pulse · 武術黃金三式</text>
+</svg>

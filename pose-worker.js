@@ -1,22 +1,110 @@
-/* Classic Worker supports the bundled WASM loader's importScripts call. */
-let model;
-self.onmessage=async({data})=>{
-  const {id,type,frame,timestamp}=data;
-  try{
-    if(type==='init'){
-      const vision=await import('./vendor/tasks-vision/vision_bundle.mjs');
-      const files=await vision.FilesetResolver.forVisionTasks(new URL('./vendor/tasks-vision/wasm',self.location.href).href);
-      model=await vision.PoseLandmarker.createFromOptions(files,{
-        baseOptions:{modelAssetPath:new URL('./vendor/tasks-vision/pose_landmarker_lite.task',self.location.href).href,delegate:'CPU'},
-        // 近距离坐姿只拍到上半身时，人体检测置信度会明显下降；放宽门槛后不必后退 1 米也能开始识别。
-        runningMode:'VIDEO',numPoses:1,minPoseDetectionConfidence:.3,minPosePresenceConfidence:.3,minTrackingConfidence:.3
+/**
+ * Pose tracking + contest coach checks for an active MediaStream.
+ * Does not request the camera; only consumes a stream from cameraFSM.
+ */
+
+import { createPoseLandmarker, summarizePose } from "./vendor/mediapipe-pose.js";
+import { createEvaluator } from "./js/core/coach.js";
+
+/**
+ * @param {object} options
+ * @param {HTMLVideoElement} options.video
+ * @param {(pose: object) => void} [options.onPose]
+ */
+export function createPoseTracker(options) {
+  const video = options.video;
+  const onPose = options.onPose ?? (() => {});
+  const evaluator = createEvaluator();
+  let landmarker = null;
+  let raf = 0;
+  let running = false;
+  let lastVideoTime = -1;
+  let checkTarget = "rest";
+  let mode = "standing";
+
+  function setCheck(target, nextMode = "standing") {
+    checkTarget = target || "rest";
+    mode = nextMode || "standing";
+    evaluator.reset();
+  }
+
+  async function attach(stream) {
+    await detach();
+    video.srcObject = stream;
+    video.muted = true;
+    video.playsInline = true;
+    await video.play().catch(() => {});
+    try {
+      landmarker = await createPoseLandmarker();
+    } catch (err) {
+      onPose({
+        detected: false,
+        score: 0,
+        nose: null,
+        shoulders: null,
+        landmarks: null,
+        coach: null,
+        error: String(err?.message || err),
       });
-      self.postMessage({id,ready:true});
-    }else if(type==='detect'){
-      if(!model)throw Error('识别模型尚未就绪');
-      const result=model.detectForVideo(frame,timestamp);
-      self.postMessage({id,result:{landmarks:result.landmarks,worldLandmarks:result.worldLandmarks}});
+      landmarker = null;
     }
-  }catch(error){self.postMessage({id,error:error.message||String(error)});}
-  finally{frame?.close();}
-};
+    running = true;
+    loop();
+  }
+
+  function loop() {
+    if (!running) return;
+    raf = requestAnimationFrame(loop);
+    if (!landmarker || video.readyState < 2) return;
+    if (video.currentTime === lastVideoTime) return;
+    lastVideoTime = video.currentTime;
+    try {
+      const now = performance.now();
+      const result = landmarker.detectForVideo(video, now);
+      const summary = summarizePose(result);
+      const aspect =
+        video.videoWidth && video.videoHeight
+          ? video.videoWidth / video.videoHeight
+          : 4 / 3;
+      let coach = null;
+      if (summary.detected && summary.landmarks) {
+        coach = evaluator.evaluate(summary.landmarks, checkTarget, mode, aspect, {
+          worldLandmarks: summary.worldLandmarks,
+          timestamp: now,
+        });
+      }
+      onPose({ ...summary, coach, check: checkTarget });
+    } catch {
+      onPose({
+        detected: false,
+        score: 0,
+        nose: null,
+        shoulders: null,
+        landmarks: null,
+        coach: null,
+      });
+    }
+  }
+
+  async function detach() {
+    running = false;
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+    lastVideoTime = -1;
+    video.pause?.();
+    video.srcObject = null;
+    evaluator.reset();
+    if (landmarker) {
+      try {
+        landmarker.close?.();
+      } catch {
+        /* ignore */
+      }
+      landmarker = null;
+    }
+  }
+
+  return { attach, detach, setCheck };
+}
